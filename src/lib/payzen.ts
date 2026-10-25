@@ -108,7 +108,7 @@ export function evaluate(expr: string): number {
       if (b === 0) return NaN;
       n2[n2.length - 1]! /= b;
     } else {
-      o2.push(ops[i]);
+      o2.push(ops[i]!);
       n2.push(b);
     }
   }
