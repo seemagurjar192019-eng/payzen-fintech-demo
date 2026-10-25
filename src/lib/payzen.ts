@@ -99,21 +99,21 @@ export function evaluate(expr: string): number {
   }
   if (expectNum) ops.pop(); // trailing operator ignored
   // first pass × ÷
-  const n2: number[] = [nums[0]];
+  const n2: number[] = [nums[0] ?? 0];
   const o2: Op[] = [];
   for (let i = 0; i < ops.length; i++) {
-    const b = nums[i + 1];
-    if (ops[i] === "×") n2[n2.length - 1] *= b;
+    const b = nums[i + 1] ?? 0;
+    if (ops[i] === "×") n2[n2.length - 1]! *= b;
     else if (ops[i] === "÷") {
       if (b === 0) return NaN;
-      n2[n2.length - 1] /= b;
+      n2[n2.length - 1]! /= b;
     } else {
       o2.push(ops[i]);
       n2.push(b);
     }
   }
-  let r = n2[0];
-  for (let i = 0; i < o2.length; i++) r = o2[i] === "+" ? r + n2[i + 1] : r - n2[i + 1];
+  let r = n2[0] ?? 0;
+  for (let i = 0; i < o2.length; i++) r = o2[i] === "+" ? r + (n2[i + 1] ?? 0) : r - (n2[i + 1] ?? 0);
   return Math.round(r * 100) / 100;
 }
 
@@ -132,7 +132,7 @@ export function press(expr: string, key: string): string {
     return expr + (curNum === "" ? "0." : ".");
   }
   // digit
-  if (curNum.includes(".") && curNum.split(".")[1].length >= 2) return expr;
+  if (curNum.includes(".") && (curNum.split(".")[1] ?? "").length >= 2) return expr;
   if (curNum.replace(".", "").length >= 9) return expr;
   if (curNum === "0") return expr.slice(0, -1) + key;
   return expr + key;
