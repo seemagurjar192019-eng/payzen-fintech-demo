@@ -9,5 +9,8 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- PayZen is a single-route app: screens switch via local state in src/components/payzen; demo state persists in localStorage via src/lib/use-payzen.ts (no backend, never real payments).
+- PayZen is a single-route app: screens switch via local state in src/components/payzen to preserve the compact mobile experience.
+- Firebase account initialization occurs only after hydration through dynamic imports; account-owned profiles are separate from local payment sandbox state to prevent accidental migration or ownership claims.
+- Firestore profiles require verified-email owner access and field validation; browser ledger writes remain denied because financial state needs a trusted authoritative service.
+- Firebase configuration is public VITE environment configuration; private service-account credentials must never enter browser code.
 - Pure payment rules (calculator, validation) live in src/lib/payzen.ts with tests beside it.

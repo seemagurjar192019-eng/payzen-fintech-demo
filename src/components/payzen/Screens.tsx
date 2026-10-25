@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { fmt, type Currency, type Recipient, type Tx } from "@/lib/payzen";
 import type { PayZen } from "@/lib/use-payzen";
+import type { FirebaseAccount } from "@/lib/use-firebase-account";
 import { AnimatedMoney, Avatar, Press, TxRow } from "./ui";
 
 export const ME: Recipient = { id: "me", name: "Naitik", handle: "you@payzen", hue: 60 };
@@ -215,7 +216,7 @@ export function Recipients({ pz, onPick }: { pz: PayZen; onPick: (r: Recipient) 
   );
 }
 
-export function Profile({ pz, onTx }: { pz: PayZen; onTx: (t: Tx) => void }) {
+export function Profile({ pz, onTx, account, onAccount }: { pz: PayZen; onTx: (t: Tx) => void; account: FirebaseAccount; onAccount: () => void }) {
   const { state } = pz;
   const reqs = state.txs.filter((t) => t.kind === "request");
   const currencies: Currency[] = ["INR", "USD", "EUR"];
@@ -225,10 +226,14 @@ export function Profile({ pz, onTx }: { pz: PayZen; onTx: (t: Tx) => void }) {
       <div className="mt-5 flex items-center gap-3 rounded-2xl bg-surface p-4">
         <Avatar r={ME} size={52} />
         <div>
-          <p className="font-semibold">{ME.name}</p>
-          <p className="text-xs text-phone-muted">Demo account · ···· 7642</p>
+          <p className="break-words font-semibold">{account.profile?.displayName || account.user?.displayName || ME.name}</p>
+          <p className="text-xs text-phone-muted">{account.user ? "Firebase account · simulated wallet" : "Local payment sandbox"}</p>
         </div>
       </div>
+      <Press onClick={onAccount} className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-phone-foreground py-3 text-sm font-semibold text-phone">
+        <UserPlus className="size-4" />{account.loading ? "Connecting account…" : account.user ? "Manage account" : "Sign in / Create account"}
+      </Press>
+      {!account.configured && <p className="mt-2 text-center text-xs text-phone-muted">Firebase connection pending</p>}
       <p className="mb-2 mt-6 flex items-center gap-1.5 text-xs font-semibold text-phone-muted"><Settings2 className="size-3.5" />Display currency</p>
       <div className="flex gap-1 rounded-full bg-surface p-1">
         {currencies.map((c) => (
@@ -248,7 +253,7 @@ export function Profile({ pz, onTx }: { pz: PayZen; onTx: (t: Tx) => void }) {
       >
         <RotateCcw className="size-4" />Reset demo data
       </Press>
-      <p className="mt-6 text-center text-[11px] leading-relaxed text-phone-muted">PayZen is a learning project. It never connects to banks, UPI, cards or payment gateways. All people, balances and transactions are fictional.</p>
+      <p className="mt-6 text-center text-[11px] leading-relaxed text-phone-muted">Payments and cards are simulated. Wallet data stays in this browser, separate from your Firebase profile. No real money moves.</p>
     </div>
   );
 }
