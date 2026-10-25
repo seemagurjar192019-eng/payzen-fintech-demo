@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) {
+      return request.auth != null && request.auth.uid == uid && request.auth.token.email_verified == true;
+    }
+    match /profiles/{uid} {
+      allow read, delete: if owner(uid);
+      allow create, update: if owner(uid)
+        && request.resource.data.keys().hasOnly(['displayName', 'bio', 'currency', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['displayName', 'bio', 'currency', 'updatedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 60
+        && request.resource.data.bio is string
+        && request.resource.data.bio.size() <= 240
+        && request.resource.data.currency in ['INR', 'USD', 'EUR']
+        && request.resource.data.updatedAt == request.time;
+    }
+    // Wallets and ledgers are deliberately not writable from the browser.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

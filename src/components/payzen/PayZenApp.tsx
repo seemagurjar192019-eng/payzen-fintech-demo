@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import { fmt, type Recipient, type Tx } from "@/lib/payzen";
 import { usePayZen } from "@/lib/use-payzen";
+import { useFirebaseAccount } from "@/lib/use-firebase-account";
+import { AccountPanel } from "./AccountPanel";
 import { AmountFlow } from "./AmountFlow";
 import { Cards, Home, Profile, Recipients } from "./Screens";
 import { Avatar, DemoBadge, Press, Sheet, TxIcon } from "./ui";
@@ -19,6 +21,8 @@ const TABS: { id: Tab; I: typeof HomeIcon; label: string }[] = [
 
 export function PayZenApp() {
   const pz = usePayZen();
+  const account = useFirebaseAccount();
+  const [accountOpen, setAccountOpen] = useState(false);
   const { state } = pz;
   const [tab, setTab] = useState<Tab>("home");
   const [dir, setDir] = useState(1);
@@ -54,7 +58,7 @@ export function PayZenApp() {
                 {tab === "home" && <Home pz={pz} onSend={() => open("send")} onRequest={() => open("request")} onTx={setDetail} onCards={() => go("cards")} onProfile={() => go("profile")} />}
                 {tab === "cards" && <Cards />}
                 {tab === "recipients" && <Recipients pz={pz} onPick={(r) => open("send", r)} />}
-                {tab === "profile" && <Profile pz={pz} onTx={setDetail} />}
+                {tab === "profile" && <Profile pz={pz} onTx={setDetail} account={account} onAccount={() => setAccountOpen(true)} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -67,6 +71,10 @@ export function PayZenApp() {
               </button>
             ))}
           </nav>
+
+          <AnimatePresence>
+            {accountOpen && <AccountPanel key={account.user?.uid ?? "signed-out-account"} account={account} onClose={() => setAccountOpen(false)} />}
+          </AnimatePresence>
 
           <AnimatePresence>
             {flow && <AmountFlow key="flow" pz={pz} initialMode={flow.mode} initialRecipient={flow.r} onClose={() => { setFlow(null); setTab("home"); }} />}
