@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Delete, Loader2, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { evaluate, fmt, OPS, press, symbol, validate, type Recipient, type Tx } from "@/lib/payzen";
 import type { PayZen } from "@/lib/use-payzen";
@@ -217,6 +217,6 @@ export function AmountFlow({ pz, initialMode, initialRecipient, onClose }: { pz:
 
 function SuccessAmount({ value, cur }: { value: number; cur: PayZen["state"]["currency"] }) {
   const [v, setV] = useState(0);
-  useState(() => setTimeout(() => setV(value), 450));
+  useEffect(() => { const t = setTimeout(() => setV(value), 450); return () => clearTimeout(t); }, [value]);
   return <AnimatedMoney value={v} currency={cur} className="block text-5xl font-extrabold" />;
 }
