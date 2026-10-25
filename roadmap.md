@@ -14,10 +14,10 @@ Payment processing remains simulated. Firebase is the selected account and stora
 - [ ] Experience (181–200): accessibility, languages, offline handling, notifications and installability; native-only capabilities need a native app.
 
 ## Current implementation slice
-- [ ] Firebase-ready email/password and Google account flow with honest unconfigured state.
-- [ ] Profile read/save and password recovery integration.
-- [ ] Owner-only Firestore rules and setup guide.
-- [ ] Validate available UI flows and tests.
+- [x] Firebase-ready email/password and Google account flow with honest unconfigured state (hosted verification blocked by missing project).
+- [x] Profile read/save and password recovery integration code (hosted verification blocked by missing project).
+- [x] Owner-only Firestore rules and setup guide (deployment requires the user's Firebase project).
+- [x] Validate available unconfigured UI flows and tests; 12 tests passed, preview build OK, no observed runtime errors.
 
 ## External blockers
 - Firebase project has not been created: web app configuration, Auth providers, authorized domains and deployed Firestore rules are required before hosted login/profile checks.
