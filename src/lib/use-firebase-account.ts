@@ -26,7 +26,7 @@ export function useFirebaseAccount() {
           stopProfile = dbApi.onSnapshot(dbApi.doc(db, "profiles", next.uid), (snapshot) => {
             if (!active) return;
             const data = snapshot.data();
-            setProfile({ displayName: typeof data?.displayName === "string" ? data.displayName : next.displayName ?? "", bio: typeof data?.bio === "string" ? data.bio : "", currency: data?.currency === "USD" || data?.currency === "EUR" ? data.currency : "INR" });
+            setProfile({ displayName: typeof data?.['displayName'] === "string" ? data['displayName'] : next.displayName ?? "", bio: typeof data?.['bio'] === "string" ? data['bio'] : "", currency: data?.['currency'] === "USD" || data?.['currency'] === "EUR" ? data['currency'] : "INR" });
           }, () => { if (active) setError("Profile could not load. Check Firestore access rules."); });
         }
       });
