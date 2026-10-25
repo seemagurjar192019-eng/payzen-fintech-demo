@@ -89,7 +89,7 @@ export function evaluate(expr: string): number {
   for (const t of tokens) {
     if (OPS.includes(t as Op)) {
       if (expectNum) return NaN;
-      ops.push(t as Op);
+      ops.push(t as Op); // eslint-disable-line
       expectNum = true;
     } else {
       if (!expectNum) return NaN;

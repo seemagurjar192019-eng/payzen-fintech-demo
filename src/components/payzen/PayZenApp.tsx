@@ -29,7 +29,7 @@ export function PayZenApp() {
     setDir(TABS.findIndex((x) => x.id === t) > TABS.findIndex((x) => x.id === tab) ? 1 : -1);
     setTab(t);
   };
-  const open = (mode: "send" | "request", r: Recipient = state.recipients[0]) => setFlow({ mode, r });
+  const open = (mode: "send" | "request", r: Recipient | undefined = state.recipients[0]) => r && setFlow({ mode, r });
   const live = detail ? state.txs.find((t) => t.id === detail.id) ?? detail : null;
 
   return (

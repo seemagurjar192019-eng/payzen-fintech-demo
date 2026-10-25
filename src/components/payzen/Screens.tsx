@@ -70,7 +70,7 @@ export function Home({ pz, onSend, onRequest, onTx, onCards, onProfile }: { pz: 
       <motion.section initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 26, delay: 0.1 }} className="mx-2 mt-6 min-h-[420px] rounded-[1.75rem] bg-sheet px-4 pb-6 pt-3 text-foreground">
         <div className="mx-auto h-1 w-8 rounded-full bg-border" />
         <div className="mt-2 flex items-center justify-between">
-          <Press aria-label="Filter" onClick={() => setFilter(filters[(filters.indexOf(filter) + 1) % filters.length])} className="grid size-8 place-items-center rounded-full bg-secondary"><ListFilter className="size-4" /></Press>
+          <Press aria-label="Filter" onClick={() => setFilter(filters[(filters.indexOf(filter) + 1) % filters.length] ?? "all")} className="grid size-8 place-items-center rounded-full bg-secondary"><ListFilter className="size-4" /></Press>
           <h2 className="text-sm font-semibold">Transactions</h2>
           <Press aria-label="Search" onClick={() => { setSearching((s) => !s); setQ(""); }} className="grid size-8 place-items-center rounded-full bg-secondary">{searching ? <X className="size-4" /> : <Search className="size-4" />}</Press>
         </div>
@@ -173,7 +173,7 @@ export function Recipients({ pz, onPick }: { pz: PayZen; onPick: (r: Recipient) 
             onSubmit={(e) => {
               e.preventDefault();
               const n = name.trim();
-              if (n.length < 2) return toast.error("Enter a name with at least 2 letters");
+              if (n.length < 2) { toast.error("Enter a name with at least 2 letters"); return; }
               pz.addRecipient(n.slice(0, 24));
               setName(""); setAdding(false);
               toast.success(`${n} added as a demo contact`);
