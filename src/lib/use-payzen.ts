@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { makeRef, SEED, type Currency, type PayState, type Recipient, type Tx } from "./payzen";
 
 const KEY = "payzen-demo-v1";
@@ -6,6 +6,8 @@ const KEY = "payzen-demo-v1";
 export function usePayZen() {
   const [state, setState] = useState<PayState>(SEED);
   const [loaded, setLoaded] = useState(false);
+  const ref = useRef(state);
+  ref.current = state;
 
   useEffect(() => {
     try {
@@ -19,12 +21,9 @@ export function usePayZen() {
   }, [state, loaded]);
 
   const send = useCallback((r: Recipient, amount: number): Tx | null => {
-    let tx: Tx | null = null;
-    setState((s) => {
-      if (amount <= 0 || amount > s.balance) return s; // never go negative
-      tx = { id: crypto.randomUUID(), ref: makeRef(), name: r.name, icon: r.id, recipientId: r.id, amount: -amount, kind: "sent", status: "completed", date: new Date().toISOString() };
-      return { ...s, balance: Math.round((s.balance - amount) * 100) / 100, txs: [tx, ...s.txs] };
-    });
+    if (amount <= 0 || amount > ref.current.balance) return null; // never go negative
+    const tx: Tx = { id: crypto.randomUUID(), ref: makeRef(), name: r.name, icon: r.id, recipientId: r.id, amount: -amount, kind: "sent", status: "completed", date: new Date().toISOString() };
+    setState((s) => ({ ...s, balance: Math.round((s.balance - amount) * 100) / 100, txs: [tx, ...s.txs] }));
     return tx;
   }, []);
 
