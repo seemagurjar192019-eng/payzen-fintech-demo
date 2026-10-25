@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, MotionConfig } from "framer-motion";
-import { CreditCard, Home as HomeIcon, User, Users } from "lucide-react";
+import { CreditCard, Download, Home as HomeIcon, User, Users } from "lucide-react";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,8 @@ import { fmt, type Recipient, type Tx } from "@/lib/payzen";
 import { usePayZen } from "@/lib/use-payzen";
 import { useFirebaseAccount } from "@/lib/use-firebase-account";
 import { AccountPanel } from "./AccountPanel";
+import { WalletTools } from "./WalletTools";
+import { downloadReceipt } from "@/lib/payzen-insights";
 import { AmountFlow } from "./AmountFlow";
 import { Cards, Home, Profile, Recipients } from "./Screens";
 import { Avatar, DemoBadge, Press, Sheet, TxIcon } from "./ui";
@@ -23,6 +25,7 @@ export function PayZenApp() {
   const pz = usePayZen();
   const account = useFirebaseAccount();
   const [accountOpen, setAccountOpen] = useState(false);
+  const [walletTools, setWalletTools] = useState<"insights" | "topup" | null>(null);
   const { state } = pz;
   const [tab, setTab] = useState<Tab>("home");
   const [dir, setDir] = useState(1);
@@ -55,7 +58,7 @@ export function PayZenApp() {
                 transition={{ type: "spring", stiffness: 300, damping: 32 }}
                 className="absolute inset-0"
               >
-                {tab === "home" && <Home pz={pz} onSend={() => open("send")} onRequest={() => open("request")} onTx={setDetail} onCards={() => go("cards")} onProfile={() => go("profile")} />}
+                {tab === "home" && <Home pz={pz} onSend={() => open("send")} onRequest={() => open("request")} onTx={setDetail} onCards={() => go("cards")} onProfile={() => go("profile")} onInsights={() => setWalletTools("insights")} onTopUp={() => setWalletTools("topup")} />}
                 {tab === "cards" && <Cards />}
                 {tab === "recipients" && <Recipients pz={pz} onPick={(r) => open("send", r)} />}
                 {tab === "profile" && <Profile pz={pz} onTx={setDetail} account={account} onAccount={() => setAccountOpen(true)} />}
@@ -71,6 +74,10 @@ export function PayZenApp() {
               </button>
             ))}
           </nav>
+
+          <AnimatePresence>
+            {walletTools && <WalletTools key={walletTools} pz={pz} mode={walletTools} onClose={() => setWalletTools(null)} />}
+          </AnimatePresence>
 
           <AnimatePresence>
             {accountOpen && <AccountPanel key={account.user?.uid ?? "signed-out-account"} account={account} onClose={() => setAccountOpen(false)} />}
@@ -97,6 +104,7 @@ export function PayZenApp() {
                   <div className="flex justify-between"><dt className="text-muted-foreground">Type</dt><dd className="font-semibold capitalize">{live.kind}</dd></div>
                 </dl>
                 <DemoBadge className="mt-4 text-muted-foreground" />
+                <Press onClick={() => downloadReceipt(live, state.currency)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-secondary py-3 text-sm font-semibold"><Download className="size-4" />Download simulated receipt</Press>
                 <div className="mt-4 flex gap-2">
                   {live.status === "pending" && (
                     <Press onClick={() => pz.cancel(live.id)} className="h-12 flex-1 rounded-full bg-secondary text-sm font-semibold text-destructive">Cancel request</Press>

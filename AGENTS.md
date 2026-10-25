@@ -14,3 +14,4 @@
 - Firestore profiles require verified-email owner access and field validation; browser ledger writes remain denied because financial state needs a trusted authoritative service.
 - Firebase configuration is public VITE environment configuration; private service-account credentials must never enter browser code.
 - Pure payment rules (calculator, validation) live in src/lib/payzen.ts with tests beside it.
+- Sandbox top-up transitions, monthly aggregation and receipt generation live in a browser-safe pure module with adjacent tests; wallet tools remain explicitly simulated and local until Firebase's authoritative wallet service exists.
