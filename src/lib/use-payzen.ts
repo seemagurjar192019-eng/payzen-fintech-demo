@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { makeRef, SEED, type Currency, type PayState, type Recipient, type Tx } from "./payzen";
+import { applySandboxTopUp } from "./payzen-insights";
 
 const KEY = "payzen-demo-v1";
 
@@ -44,8 +45,20 @@ export function usePayZen() {
   }, []);
 
   const setCurrency = useCallback((currency: Currency) => setState((s) => ({ ...s, currency })), []);
+  const setBudget = useCallback((monthlyBudget: number) => {
+    if (!Number.isFinite(monthlyBudget) || monthlyBudget < 0) return;
+    setState((s) => ({ ...s, monthlyBudget: Math.round(monthlyBudget * 100) / 100 }));
+  }, []);
+  const topUp = useCallback((amount: number): Tx | null => {
+    const tx: Tx = { id: crypto.randomUUID(), ref: makeRef(), name: "Sandbox top-up", icon: "briefcase", amount, kind: "received", status: "completed", date: new Date().toISOString() };
+    const next = applySandboxTopUp(ref.current, tx);
+    if (!next) return null;
+    ref.current = next;
+    setState(next);
+    return tx;
+  }, []);
   const reset = useCallback(() => setState(SEED), []);
 
-  return { state, send, request, cancel, addRecipient, setCurrency, reset };
+  return { state, send, request, cancel, addRecipient, setCurrency, setBudget, topUp, reset };
 }
 export type PayZen = ReturnType<typeof usePayZen>;

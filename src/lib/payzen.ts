@@ -25,6 +25,7 @@ export interface PayState {
   txs: Tx[];
   recipients: Recipient[];
   currency: Currency;
+  monthlyBudget?: number;
 }
 
 export const RATES: Record<Currency, number> = { INR: 1, USD: 1 / 84, EUR: 1 / 91 };

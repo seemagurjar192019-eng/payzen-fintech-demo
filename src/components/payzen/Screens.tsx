@@ -18,7 +18,7 @@ const CARDS = [
 
 type Filter = "all" | "sent" | "received" | "request";
 
-export function Home({ pz, onSend, onRequest, onTx, onCards, onProfile }: { pz: PayZen; onSend: () => void; onRequest: () => void; onTx: (t: Tx) => void; onCards: () => void; onProfile: () => void }) {
+export function Home({ pz, onSend, onRequest, onTx, onCards, onProfile, onInsights, onTopUp }: { pz: PayZen; onSend: () => void; onRequest: () => void; onTx: (t: Tx) => void; onCards: () => void; onProfile: () => void; onInsights: () => void; onTopUp: () => void }) {
   const { state } = pz;
   const [q, setQ] = useState("");
   const [searching, setSearching] = useState(false);
@@ -54,8 +54,9 @@ export function Home({ pz, onSend, onRequest, onTx, onCards, onProfile }: { pz: 
           <Press onClick={onRequest} className="flex items-center gap-1.5 rounded-full bg-surface px-4 py-1.5 text-sm font-semibold">
             <ArrowDownLeft className="size-3.5" />Request
           </Press>
+          <Press onClick={onTopUp} aria-label="Add demo money" title="Add demo money" className="grid size-9 place-items-center rounded-full bg-zen-teal text-primary"><Plus className="size-4" /></Press>
         </div>
-        <Press onClick={() => setFilter("sent")} className="mt-6 flex w-[85%] items-center justify-between rounded-2xl bg-surface px-4 py-3 text-left">
+        <Press onClick={onInsights} aria-label="Spending insights" className="mt-6 flex w-[85%] items-center justify-between rounded-2xl bg-surface px-4 py-3 text-left">
           <div>
             <p className="text-[11px] text-phone-muted">Spending</p>
             <p className="tabular font-bold">{fmt(spent, state.currency)}</p>
