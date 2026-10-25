@@ -1,24 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PayZenApp } from "@/components/payzen/PayZenApp";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "PayZen — Animated Demo Payment App" },
+      { name: "description", content: "PayZen is a premium animated fintech demo. Simulation only — no real money is ever transferred." },
+      { property: "og:title", content: "PayZen — Animated Demo Payment App" },
+      { property: "og:description", content: "Send, request and track fictional payments in a polished mobile demo. No real money moves." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: PayZenApp,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
