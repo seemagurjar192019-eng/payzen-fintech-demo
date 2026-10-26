@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { makeRef, SEED, type Currency, type PayState, type Recipient, type Tx } from "./payzen";
+import { DEFAULT_DAILY_LIMIT, makeRef, sentToday, SEED, withinDailyLimit, type Currency, type PayState, type Recipient, type Tx } from "./payzen";
 import { applySandboxTopUp } from "./payzen-insights";
 
 const KEY = "payzen-demo-v1";
@@ -23,6 +23,7 @@ export function usePayZen() {
 
   const send = useCallback((r: Recipient, amount: number): Tx | null => {
     if (amount <= 0 || amount > ref.current.balance) return null; // never go negative
+    if (!withinDailyLimit(amount, sentToday(ref.current.txs), ref.current.dailyLimit ?? DEFAULT_DAILY_LIMIT)) return null;
     const tx: Tx = { id: crypto.randomUUID(), ref: makeRef(), name: r.name, icon: r.id, recipientId: r.id, amount: -amount, kind: "sent", status: "completed", date: new Date().toISOString() };
     setState((s) => ({ ...s, balance: Math.round((s.balance - amount) * 100) / 100, txs: [tx, ...s.txs] }));
     return tx;
@@ -57,8 +58,10 @@ export function usePayZen() {
     setState(next);
     return tx;
   }, []);
+  const setDailyLimit = useCallback((dailyLimit: number) => setState((s) => ({ ...s, dailyLimit: Math.round(dailyLimit) })), []);
+  const setHideBalance = useCallback((hideBalance: boolean) => setState((s) => ({ ...s, hideBalance })), []);
   const reset = useCallback(() => setState(SEED), []);
 
-  return { state, send, request, cancel, addRecipient, setCurrency, setBudget, topUp, reset };
+  return { state, send, request, cancel, addRecipient, setCurrency, setBudget, topUp, setDailyLimit, setHideBalance, reset };
 }
 export type PayZen = ReturnType<typeof usePayZen>;
