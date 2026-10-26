@@ -50,9 +50,9 @@ export function SettingsPanel({ pz, lock, onClose, onSetPin }: { pz: PayZen; loc
   };
   const editLimit = () => {
     const v = prompt("Daily send limit (₹)", String(limit));
-    if (v === null) return;
+    if (v === null) { return; }
     const n = Number(v);
-    if (!Number.isFinite(n) || n < 100 || n > 100_000) return toast.error("Choose between ₹100 and ₹1,00,000");
+    if (!Number.isFinite(n) || n < 100 || n > 100_000) { toast.error("Choose between ₹100 and ₹1,00,000"); return; }
     pz.setDailyLimit(n); toast.success("Daily limit updated");
   };
 
