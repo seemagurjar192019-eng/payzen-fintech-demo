@@ -14,6 +14,8 @@ Payment processing remains simulated. Firebase is the selected account and stora
 - [ ] Experience (181–200): accessibility, languages, offline handling, notifications and installability; native-only capabilities need a native app.
 
 ## Current implementation slice
+- [x] 4-digit PIN app lock (hashed, 5-try lockout), PIN before every payment, Settings (security, daily ₹10,000 limit, hide balance, CSV statement, help, terms); 25 tests pass, PIN set/lock/unlock verified.
+- [ ] Not done yet (credits): onboarding slides, notifications inbox, QR scan, bills/recharge, split bill, favourites/notes, theme toggle.
 - [x] Add spending insights, editable monthly sandbox budget, simulated wallet top-up and downloadable transaction receipts; 18 tests passed and top-up, refresh, budget persistence and receipt download verified in the UI.
 - [x] Firebase-ready email/password and Google account flow with honest unconfigured state (hosted verification blocked by missing project).
 - [x] Profile read/save and password recovery integration code (hosted verification blocked by missing project).
