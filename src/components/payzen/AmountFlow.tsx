@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Delete, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { evaluate, fmt, OPS, press, symbol, validate, type Recipient, type Tx } from "@/lib/payzen";
+import { DEFAULT_DAILY_LIMIT, evaluate, fmt, sentToday, withinDailyLimit, OPS, press, symbol, validate, type Recipient, type Tx } from "@/lib/payzen";
 import type { PayZen } from "@/lib/use-payzen";
 import { AnimatedMoney, Avatar, DemoBadge, Press, SwipeConfirm } from "./ui";
 
