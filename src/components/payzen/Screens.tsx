@@ -45,8 +45,11 @@ export function Home({ pz, onSend, onRequest, onTx, onCards, onProfile, onInsigh
             <motion.div key={c.id} className={cn("absolute inset-y-0 w-20 rounded-2xl", c.bg)} style={{ left: i * 10, zIndex: 3 - i }} initial={{ x: 60, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 + i * 0.08, type: "spring", stiffness: 200, damping: 20 }} whileHover={{ x: -6 }} />
           ))}
         </motion.button>
-        <p className="mt-10 text-xs text-phone-muted">Total demo balance</p>
-        <AnimatedMoney value={state.balance} currency={state.currency} split className="block text-[2.4rem] font-extrabold leading-tight tracking-tight" />
+        <p className="mt-10 text-xs text-phone-muted">Wallet balance · test mode</p>
+        <button type="button" aria-label={state.hideBalance ? "Show balance" : "Hide balance"} onClick={() => pz.setHideBalance(!state.hideBalance)} className="flex items-center gap-2 text-left">
+          {state.hideBalance ? <span className="block text-[2.4rem] font-extrabold leading-tight tracking-widest">••••••</span> : <AnimatedMoney value={state.balance} currency={state.currency} split className="block text-[2.4rem] font-extrabold leading-tight tracking-tight" />}
+          {state.hideBalance ? <Eye className="size-5 text-phone-muted" /> : <EyeOff className="size-5 text-phone-muted" />}
+        </button>
         <div className="mt-3 flex gap-2">
           <Press onClick={onSend} className="flex items-center gap-1.5 rounded-full bg-phone-foreground py-1.5 pl-1.5 pr-4 text-sm font-semibold text-phone">
             <span className="grid size-6 place-items-center rounded-full bg-phone text-phone-foreground"><ArrowUpRight className="size-3.5" /></span>Send
@@ -217,7 +220,7 @@ export function Recipients({ pz, onPick }: { pz: PayZen; onPick: (r: Recipient) 
   );
 }
 
-export function Profile({ pz, onTx, account, onAccount }: { pz: PayZen; onTx: (t: Tx) => void; account: FirebaseAccount; onAccount: () => void }) {
+export function Profile({ pz, onTx, account, onAccount, onSettings }: { onSettings: () => void; pz: PayZen; onTx: (t: Tx) => void; account: FirebaseAccount; onAccount: () => void }) {
   const { state } = pz;
   const reqs = state.txs.filter((t) => t.kind === "request");
   const currencies: Currency[] = ["INR", "USD", "EUR"];
@@ -234,6 +237,7 @@ export function Profile({ pz, onTx, account, onAccount }: { pz: PayZen; onTx: (t
       <Press onClick={onAccount} className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-phone-foreground py-3 text-sm font-semibold text-phone">
         <UserPlus className="size-4" />{account.loading ? "Connecting account…" : account.user ? "Manage account" : "Sign in / Create account"}
       </Press>
+      <Press onClick={onSettings} className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-surface py-3 text-sm font-semibold"><Settings2 className="size-4" />Settings & security</Press>
       {!account.configured && <p className="mt-2 text-center text-xs text-phone-muted">Firebase connection pending</p>}
       <p className="mb-2 mt-6 flex items-center gap-1.5 text-xs font-semibold text-phone-muted"><Settings2 className="size-3.5" />Display currency</p>
       <div className="flex gap-1 rounded-full bg-surface p-1">

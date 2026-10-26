@@ -7,6 +7,9 @@ import { fmt, type Recipient, type Tx } from "@/lib/payzen";
 import { usePayZen } from "@/lib/use-payzen";
 import { useFirebaseAccount } from "@/lib/use-firebase-account";
 import { AccountPanel } from "./AccountPanel";
+import { PinPad } from "./PinPad";
+import { SettingsPanel } from "./SettingsPanel";
+import { useAppLock } from "@/lib/use-app-lock";
 import { WalletTools } from "./WalletTools";
 import { downloadReceipt } from "@/lib/payzen-insights";
 import { AmountFlow } from "./AmountFlow";
@@ -25,6 +28,11 @@ export function PayZenApp() {
   const pz = usePayZen();
   const account = useFirebaseAccount();
   const [accountOpen, setAccountOpen] = useState(false);
+  const lock = useAppLock();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [pinSetup, setPinSetup] = useState(false);
+  const [pinGate, setPinGate] = useState<(() => void) | null>(null);
+  const requirePin = (go: () => void) => (lock.hasPin ? setPinGate(() => go) : go());
   const [walletTools, setWalletTools] = useState<"insights" | "topup" | null>(null);
   const { state } = pz;
   const [tab, setTab] = useState<Tab>("home");
@@ -44,7 +52,7 @@ export function PayZenApp() {
       <main className="flex min-h-[100dvh] items-center justify-center bg-background md:py-8">
         <div className="relative h-[100dvh] w-full overflow-hidden bg-phone text-phone-foreground md:h-[844px] md:w-[390px] md:rounded-[3rem] md:border-[10px] md:border-primary md:shadow-phone">
           <div className="flex items-center justify-center gap-2 pt-3 text-[10px] font-bold uppercase tracking-widest text-phone-muted">
-            <span className="text-phone-foreground">PayZen</span>· demo
+            <span className="text-phone-foreground">PayZen</span>· test mode
           </div>
           <div className="relative h-[calc(100%-1.75rem)]">
             <AnimatePresence mode="popLayout" custom={dir} initial={false}>
@@ -61,7 +69,7 @@ export function PayZenApp() {
                 {tab === "home" && <Home pz={pz} onSend={() => open("send")} onRequest={() => open("request")} onTx={setDetail} onCards={() => go("cards")} onProfile={() => go("profile")} onInsights={() => setWalletTools("insights")} onTopUp={() => setWalletTools("topup")} />}
                 {tab === "cards" && <Cards />}
                 {tab === "recipients" && <Recipients pz={pz} onPick={(r) => open("send", r)} />}
-                {tab === "profile" && <Profile pz={pz} onTx={setDetail} account={account} onAccount={() => setAccountOpen(true)} />}
+                {tab === "profile" && <Profile pz={pz} onTx={setDetail} account={account} onAccount={() => setAccountOpen(true)} onSettings={() => setSettingsOpen(true)} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -84,7 +92,7 @@ export function PayZenApp() {
           </AnimatePresence>
 
           <AnimatePresence>
-            {flow && <AmountFlow key="flow" pz={pz} initialMode={flow.mode} initialRecipient={flow.r} onClose={() => { setFlow(null); setTab("home"); }} />}
+            {flow && <AmountFlow key="flow" pz={pz} initialMode={flow.mode} initialRecipient={flow.r} requirePin={requirePin} onClose={() => { setFlow(null); setTab("home"); }} />}
           </AnimatePresence>
 
           <AnimatePresence>
@@ -117,6 +125,14 @@ export function PayZenApp() {
                 </div>
               </Sheet>
             )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {settingsOpen && <SettingsPanel key="settings" pz={pz} lock={lock} onClose={() => setSettingsOpen(false)} onSetPin={() => setPinSetup(true)} />}
+          </AnimatePresence>
+          <AnimatePresence>
+            {pinGate && <PinPad key="gate" lock={lock} mode="verify" title="Enter PIN to pay" onCancel={() => setPinGate(null)} onDone={() => { const g = pinGate; setPinGate(null); g(); }} />}
+            {pinSetup && <PinPad key="setup" lock={lock} mode="setup" onCancel={() => setPinSetup(false)} onDone={() => setPinSetup(false)} />}
+            {lock.ready && lock.locked && !pinSetup && <PinPad key="lock" lock={lock} mode="verify" onDone={() => {}} />}
           </AnimatePresence>
           <Toaster position="top-center" />
         </div>

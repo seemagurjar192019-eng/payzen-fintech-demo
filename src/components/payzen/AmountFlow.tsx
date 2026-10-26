@@ -2,14 +2,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Delete, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { evaluate, fmt, OPS, press, symbol, validate, type Recipient, type Tx } from "@/lib/payzen";
+import { DEFAULT_DAILY_LIMIT, evaluate, fmt, sentToday, withinDailyLimit, OPS, press, symbol, validate, type Recipient, type Tx } from "@/lib/payzen";
 import type { PayZen } from "@/lib/use-payzen";
 import { AnimatedMoney, Avatar, DemoBadge, Press, SwipeConfirm } from "./ui";
 
 type Mode = "send" | "request";
 type Step = "enter" | "review" | "success" | "requested";
 
-export function AmountFlow({ pz, initialMode, initialRecipient, onClose }: { pz: PayZen; initialMode: Mode; initialRecipient: Recipient; onClose: () => void }) {
+export function AmountFlow({ pz, initialMode, initialRecipient, onClose, requirePin }: { requirePin?: (go: () => void) => void; pz: PayZen; initialMode: Mode; initialRecipient: Recipient; onClose: () => void }) {
   const { state } = pz;
   const cur = state.currency;
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -25,10 +25,16 @@ export function AmountFlow({ pz, initialMode, initialRecipient, onClose }: { pz:
   const rate = cur === "INR" ? 1 : cur === "USD" ? 1 / 84 : 1 / 91;
   const display = evaluate(expr);
   const amountInr = Math.round((display / rate) * 100) / 100;
-  const v = validate(amountInr, state.balance, mode);
+  const base = validate(amountInr, state.balance, mode);
+  const limit = state.dailyLimit ?? DEFAULT_DAILY_LIMIT;
+  const v = base.ok && mode === "send" && !withinDailyLimit(amountInr, sentToday(state.txs), limit) ? { ok: false as const, reason: `Daily limit ${fmt(limit, cur)} reached` } : base;
   const hasOp = /[+−×÷]/.test(expr);
 
   const confirm = () => {
+    if (lock.current || !v.ok) return;
+    if (mode === "send" && requirePin) requirePin(doConfirm); else doConfirm();
+  };
+  const doConfirm = () => {
     if (lock.current || !v.ok) return; // duplicate-submission guard
     lock.current = true;
     setBusy(true);

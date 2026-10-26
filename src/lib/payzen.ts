@@ -26,6 +26,8 @@ export interface PayState {
   recipients: Recipient[];
   currency: Currency;
   monthlyBudget?: number;
+  dailyLimit?: number;
+  hideBalance?: boolean;
 }
 
 export const RATES: Record<Currency, number> = { INR: 1, USD: 1 / 84, EUR: 1 / 91 };
@@ -146,4 +148,29 @@ export function validate(amount: number, balance: number, mode: "send" | "reques
   if (amount > 1_000_000) return { ok: false, reason: "Demo limit is ₹10,00,000" };
   if (mode === "send" && amount > balance) return { ok: false, reason: "Insufficient demo balance" };
   return { ok: true };
+}
+
+// ---------- limits & PIN rules ----------
+export const DEFAULT_DAILY_LIMIT = 10_000;
+export const MAX_PIN_ATTEMPTS = 5;
+export const PIN_LOCKOUT_MS = 30_000;
+
+/** Total INR sent (completed) on the same local day as `now`. */
+export function sentToday(txs: Tx[], now: Date = new Date()): number {
+  const day = now.toDateString();
+  return txs.filter((t) => t.kind === "sent" && t.status === "completed" && new Date(t.date).toDateString() === day).reduce((a, t) => a - t.amount, 0);
+}
+export function withinDailyLimit(amount: number, alreadySent: number, limit: number = DEFAULT_DAILY_LIMIT): boolean {
+  return alreadySent + amount <= limit;
+}
+/** Returns lockout end timestamp after a failed attempt, or null if still allowed. */
+export function lockoutAfter(failedAttempts: number, now: number): number | null {
+  return failedAttempts >= MAX_PIN_ATTEMPTS ? now + PIN_LOCKOUT_MS : null;
+}
+export function isValidPin(pin: string): boolean {
+  return /^\d{4}$/.test(pin);
+}
+export function toCsv(txs: Tx[]): string {
+  const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  return ["Reference,Date,Name,Type,Status,Amount (INR)", ...txs.map((t) => [t.ref, t.date, esc(t.name), t.kind, t.status, t.amount.toFixed(2)].join(","))].join("\n");
 }
